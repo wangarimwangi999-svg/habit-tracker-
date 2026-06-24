@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Habit Tracker</title>
+
+<link rel="manifest" href="manifest.json">
+
+<style>
+
+body {
+    font-family: Arial, sans-serif;
+    background:#f7f3ff;
+    margin:0;
+    padding:25px;
+    color:#444;
+}
+
+
+.container{
+    max-width:800px;
+    margin:auto;
+    background:white;
+    padding:25px;
+    border-radius:25px;
+    box-shadow:0 10px 25px #ddd;
+}
+
+
+h1{
+    text-align:center;
+    color:#8b6fd1;
+}
+
+
+.add-box{
+    display:flex;
+    gap:10px;
+}
+
+
+input{
+    flex:1;
+    padding:12px;
+    border-radius:15px;
+    border:1px solid #ddd;
+}
+
+
+button{
+    border:none;
+    padding:12px 18px;
+    border-radius:15px;
+    cursor:pointer;
+    background:#b8e0d2;
+}
+
+
+.habit{
+    background:#fff7fb;
+    margin-top:20px;
+    padding:20px;
+    border-radius:20px;
+}
+
+
+.days{
+    display:grid;
+    grid-template-columns:repeat(7,1fr);
+    gap:8px;
+}
+
+
+.day{
+    background:#eee;
+    padding:12px;
+    text-align:center;
+    border-radius:12px;
+    cursor:pointer;
+}
+
+
+.checked{
+    background:#c8f7c5;
+}
+
+
+.progress{
+    height:12px;
+    background:#eee;
+    border-radius:20px;
+    margin-top:15px;
+}
+
+
+.bar{
+    height:100%;
+    background:#a8dadc;
+    border-radius:20px;
+}
+
+
+.delete{
+    background:#ffd6d6;
+}
+
+</style>
+
+</head>
+
+
+<body>
+
+
+<div class="container">
+
+<h1>🌱 Habit Tracker</h1>
+
+
+<div class="add-box">
+
+<input id="habitInput" placeholder="New habit">
+
+<button onclick="addHabit()">Add</button>
+
+</div>
+
+
+<div id="habits"></div>
+
+
+</div>
+
+
+
+<script>
+
+
+const days=[
+"Mon","Tue","Wed",
+"Thu","Fri","Sat","Sun"
+];
+
+
+let habits =
+JSON.parse(localStorage.getItem("habits")) || [];
+
+
+
+function save(){
+
+localStorage.setItem(
+"habits",
+JSON.stringify(habits)
+);
+
+}
+
+
+
+function addHabit(){
+
+let name =
+document.getElementById("habitInput").value.trim();
+
+
+if(!name)return;
+
+
+habits.push({
+
+name:name,
+
+completed:[
+false,false,false,
+false,false,false,false
+
+]
+
+});
+
+
+document.getElementById("habitInput").value="";
+
+
+save();
+
+render();
+
+}
+
+
+
+
+function toggleDay(i,j){
+
+habits[i].completed[j]
+=
+!habits[i].completed[j];
+
+
+save();
+
+render();
+
+}
+
+
+
+
+function deleteHabit(i){
+
+habits.splice(i,1);
+
+save();
+
+render();
+
+}
+
+
+
+
+
+function render(){
+
+
+let box =
+document.getElementById("habits");
+
+
+box.innerHTML="";
+
+
+
+habits.forEach((h,i)=>{
+
+
+let done =
+h.completed.filter(x=>x).length;
+
+
+let percent =
+Math.round(done/7*100);
+
+
+
+box.innerHTML += `
+
+
+<div class="habit">
+
+
+<h3>${h.name}</h3>
+
+
+<div class="days">
+
+
+${days.map((d,j)=>`
+
+<div class="day ${h.completed[j]?'checked':''}"
+
+onclick="toggleDay(${i},${j})">
+
+${d}
+
+</div>
+
+
+`).join("")}
+
+
+</div>
+
+
+
+<div class="progress">
+
+<div class="bar"
+style="width:${percent}%">
+
+</div>
+
+</div>
+
+
+<p>${percent}% complete</p>
+
+
+<button class="delete"
+onclick="deleteHabit(${i})">
+
+Delete
+
+</button>
+
+
+</div>
+
+
+`;
+
+});
+
+
+}
+
+
+
+render();
+
+
+
+// Enable offline app
+
+if("serviceWorker" in navigator){
+
+navigator.serviceWorker.register(
+"service-worker.js"
+);
+
+}
+
+
+</script>
+
+
+
+</body>
+</html>
